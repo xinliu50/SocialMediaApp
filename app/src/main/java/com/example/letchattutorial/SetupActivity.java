@@ -21,9 +21,15 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.security.spec.ECField;
 import java.util.HashMap;
+import java.util.Set;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -36,6 +42,7 @@ public class SetupActivity extends AppCompatActivity {
     private String CurrentUserId;
     private ProgressDialog loadingBar;
     private final static int Gallery_Pick = 1;
+    private StorageReference UserProfileImageRef;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,7 +71,52 @@ public class SetupActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == Gallery_Pick && resultCode == RESULT_OK && data != null){
             Uri ImageUri = data.getData();
+            CropImage.activity()
+                    .setGuidelines(CropImageView.Guidelines.ON)
+                    .setAspectRatio(1,1)
+                    .start(this);
+        }
+        if(requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if(resultCode == RESULT_OK){
+                loadingBar.setTitle("Profile Image");
+                loadingBar.setMessage("Please wait while we are updating your profile image..");
+                loadingBar.show();
+                loadingBar.setCanceledOnTouchOutside(true);
 
+                Uri resultUri = result.getUri();
+                StorageReference filePath = UserProfileImageRef.child(CurrentUserId+".jpg");
+                filePath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        if(task.isSuccessful()){
+                            Toast.makeText(SetupActivity.this,"Profile Image is successfully saved to storage",Toast.LENGTH_LONG).show();
+                            final String downloadUrl = task.getResult().getStorage().getDownloadUrl().toString();
+                            UserRef.child("profileImage").setValue(downloadUrl)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()){
+                                                Intent selfIntent = new Intent(SetupActivity.this, SetupActivity.class);
+                                                startActivity(selfIntent);
+
+                                                Toast.makeText(SetupActivity.this,"Profile Image is successfully saved to database",Toast.LENGTH_LONG).show();
+                                                loadingBar.dismiss();
+                                            }
+                                            else{
+                                                String message = task.getException().getMessage();
+                                                Toast.makeText(SetupActivity.this,"Error occurred" + message,Toast.LENGTH_LONG).show();
+                                                loadingBar.dismiss();
+                                            }
+                                        }
+                                    });
+                        }
+                    }
+                });
+            }else{
+                Toast.makeText(SetupActivity.this,"Error occurred, Image can't be cropped, Try Again..",Toast.LENGTH_LONG).show();
+                loadingBar.dismiss();
+            }
         }
     }
 
@@ -79,6 +131,7 @@ public class SetupActivity extends AppCompatActivity {
         loadingBar = new ProgressDialog(this);
 
         UserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(CurrentUserId);
+        UserProfileImageRef = FirebaseStorage.getInstance().getReference().child("Profile Images");
     }
 
     private void SaveAccountSetUpInformation() {

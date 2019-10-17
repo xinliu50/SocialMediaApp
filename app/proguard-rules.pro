@@ -28,3 +28,5 @@
     -keepclassmembers class com.yourcompany.models.** {
       *;
     }
+
+    -keep class androidx.appcompat.widget.** { *; }
