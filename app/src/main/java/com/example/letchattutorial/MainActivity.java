@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 
@@ -22,6 +23,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,11 +37,43 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseDatabase database;
     private DatabaseReference UserRef;
+    private View navView;
+    private CircleImageView NavProfileImage;
+    private TextView NavProfileUserName;
+    private String CurrentUserId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        InitialUI();
+        CurrentUserId = mAuth.getCurrentUser().getUid();
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                UserMenuSelector(menuItem);
+                return false;
+            }
+        });
+        UserRef.child(CurrentUserId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    String fullname = dataSnapshot.child("fullname").getValue().toString();
+                    String image = dataSnapshot.child("profileImage").getValue().toString();
+                    NavProfileUserName.setText(fullname);
+                    Picasso.get().load(image).placeholder(R.drawable.profile).into(NavProfileImage);
+                }
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void InitialUI(){
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
         UserRef = database.getReference().child("Users");
@@ -53,16 +89,10 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         navigationView = (NavigationView)findViewById(R.id.navigation_view);
-        View navView = navigationView.inflateHeaderView(R.layout.navigation_header);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                UserMenuSelector(menuItem);
-                return false;
-            }
-        });
+        navView = navigationView.inflateHeaderView(R.layout.navigation_header);
+        NavProfileImage = (CircleImageView)navView.findViewById(R.id.nav_profile_image);
+        NavProfileUserName = (TextView)navView.findViewById(R.id.nav_user_full_name);
     }
-
     @Override
     protected void onStart() {
         super.onStart();

@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.service.autofill.SaveInfo;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,11 +20,15 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -64,6 +69,21 @@ public class SetupActivity extends AppCompatActivity {
                 startActivityForResult(galleryIntent, Gallery_Pick);
             }
         });
+        UserRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    String image = dataSnapshot.child("profileImage").getValue().toString();
+                    Picasso.get().load(image).placeholder(R.drawable.profile).into(ProfileImage);
+                    Log.d("hey","onDatachange "+image);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.d("hey","databaseerror: "+databaseError.getMessage());
+            }
+        });
     }
 
     @Override
@@ -71,7 +91,7 @@ public class SetupActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == Gallery_Pick && resultCode == RESULT_OK && data != null){
             Uri ImageUri = data.getData();
-            CropImage.activity()
+            CropImage.activity(ImageUri)
                     .setGuidelines(CropImageView.Guidelines.ON)
                     .setAspectRatio(1,1)
                     .start(this);
