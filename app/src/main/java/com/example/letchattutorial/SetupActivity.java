@@ -17,7 +17,9 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -48,6 +50,9 @@ public class SetupActivity extends AppCompatActivity {
     private ProgressDialog loadingBar;
     private final static int Gallery_Pick = 1;
     private StorageReference UserProfileImageRef;
+    private static String Url;
+    private String image;
+    String TAG = "status";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,9 +78,19 @@ public class SetupActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
-                    String image = dataSnapshot.child("profileImage").getValue().toString();
-                    Picasso.get().load(image).placeholder(R.drawable.profile).into(ProfileImage);
-                    Log.d("hey","onDatachange "+image);
+                    //String image = dataSnapshot.child("profileImage").getValue().toString();
+                    //Log.d("status",image);
+                   // String image = downloadUrl;
+                    /*StorageReference path = UserProfileImageRef.child(CurrentUserId);
+                    path.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            image = uri.toString();
+                        }
+                    });*/
+                    Picasso.get().load(Url).placeholder(R.drawable.profile).into(ProfileImage);
+                }else{
+                    Log.d("status","NOT EXSIT");
                 }
             }
 
@@ -112,11 +127,20 @@ public class SetupActivity extends AppCompatActivity {
                         if(task.isSuccessful()){
                             Toast.makeText(SetupActivity.this,"Profile Image is successfully saved to storage",Toast.LENGTH_LONG).show();
                             final String downloadUrl = task.getResult().getStorage().getDownloadUrl().toString();
+                            task.getResult().getStorage().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    Url = uri.toString();
+                                    Log.d("downloadUrl",Url);
+                                }
+                            });
+                           // Log.d("url",downloadUrl);
                             UserRef.child("profileImage").setValue(downloadUrl)
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if(task.isSuccessful()){
+                                                Log.d("status","task.isSuccessful()");
                                                 Intent selfIntent = new Intent(SetupActivity.this, SetupActivity.class);
                                                 startActivity(selfIntent);
 
@@ -152,6 +176,7 @@ public class SetupActivity extends AppCompatActivity {
 
         UserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(CurrentUserId);
         UserProfileImageRef = FirebaseStorage.getInstance().getReference().child("Profile Images");
+        Log.d(TAG,CurrentUserId);
     }
 
     private void SaveAccountSetUpInformation() {
