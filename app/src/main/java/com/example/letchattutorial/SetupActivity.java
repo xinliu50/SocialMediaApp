@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.service.autofill.SaveInfo;
+import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -88,7 +89,18 @@ public class SetupActivity extends AppCompatActivity {
                             image = uri.toString();
                         }
                     });*/
-                    Picasso.get().load(Url).placeholder(R.drawable.profile).into(ProfileImage);
+                    String image = dataSnapshot.child("profileImage").getValue().toString();
+                    if( image != null){
+                        StorageReference path = FirebaseStorage.getInstance().getReference(image);
+                        path.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                Picasso.get().load(uri).placeholder(R.drawable.profile).into(ProfileImage);
+                            }
+                        });
+                    }else{
+                        Toast.makeText(SetupActivity.this,"Please select profile image first", Toast.LENGTH_LONG).show();
+                    }
                 }else{
                     Log.d("status","NOT EXSIT");
                 }
@@ -120,7 +132,7 @@ public class SetupActivity extends AppCompatActivity {
                 loadingBar.setCanceledOnTouchOutside(true);
 
                 Uri resultUri = result.getUri();
-                StorageReference filePath = UserProfileImageRef.child(CurrentUserId+".jpg");
+                final StorageReference filePath = UserProfileImageRef.child(CurrentUserId+".jpg");
                 filePath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
@@ -135,7 +147,9 @@ public class SetupActivity extends AppCompatActivity {
                                 }
                             });
                            // Log.d("url",downloadUrl);
-                            UserRef.child("profileImage").setValue(downloadUrl)
+                           // UserRef.child("profileImage").setValue(downloadUrl)
+                            Log.d(TAG+"filePath",filePath.toString());
+                            UserRef.child("profileImage").setValue(filePath.getPath())
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
@@ -175,7 +189,7 @@ public class SetupActivity extends AppCompatActivity {
         loadingBar = new ProgressDialog(this);
 
         UserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(CurrentUserId);
-        UserProfileImageRef = FirebaseStorage.getInstance().getReference().child("Profile Images");
+        UserProfileImageRef = FirebaseStorage.getInstance().getReference().child("Profile_Images");
         Log.d(TAG,CurrentUserId);
     }
 
