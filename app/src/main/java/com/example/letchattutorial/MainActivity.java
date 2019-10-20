@@ -171,6 +171,8 @@ public class MainActivity extends AppCompatActivity {
         FirebaseRecyclerAdapter<Posts, PostsViewHolder> firebaseRecyclerAdapter=new FirebaseRecyclerAdapter<Posts, PostsViewHolder>(options) {
             @Override
             protected void onBindViewHolder(@NonNull final PostsViewHolder holder, int position, @NonNull Posts model) {
+                final String PostKey = getRef(position).getKey();
+
                 holder.username.setText(model.getFullname());
                 holder.time.setText(" " +model.getTime());
                 holder.date.setText(" "+model.getDate());
@@ -189,6 +191,16 @@ public class MainActivity extends AppCompatActivity {
                         Picasso.get().load(uri).into(holder.postImage);
                     }
                 });
+
+                holder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent clickPostIntent = new Intent(MainActivity.this,ClickPostActivity.class);
+                        clickPostIntent.putExtra("PostKey",PostKey);
+                        startActivity(clickPostIntent);
+                    }
+                });
+
             }
 
             @NonNull
@@ -206,8 +218,11 @@ public class MainActivity extends AppCompatActivity {
         TextView username,date,time,description;
         CircleImageView user_post_image;
         ImageView postImage;
+        View mView;
+
         public PostsViewHolder(View itemView) {
             super(itemView);
+            mView = itemView;
 
             username=itemView.findViewById(R.id.post_user_name);
             date=itemView.findViewById(R.id.post_date);
