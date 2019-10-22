@@ -185,10 +185,6 @@ public class MainActivity extends AppCompatActivity {
             protected void onBindViewHolder(@NonNull final PostsViewHolder holder, int position, @NonNull Posts model) {
                 final String PostKey = getRef(position).getKey();
 
-               // holder.username.setText(model.getFullname());
-               // holder.time.setText(" " +model.getTime());
-               // holder.date.setText(" "+model.getDate());
-               // holder.description.setText(model.getDescription());
                 holder.setFullname(model.getFullname());
                 holder.setTime(model.getTime());
                 holder.setDate(model.getDate());
@@ -197,22 +193,6 @@ public class MainActivity extends AppCompatActivity {
                 holder.setPostimage(model.getPostimage());
 
                 holder.setLikeButtonStatus(PostKey);
-
-
-               /* StorageReference filePath = FirebaseStorage.getInstance().getReference(model.getProfileimage());
-                filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        Picasso.get().load(uri).into(holder.user_post_image);
-                    }
-                });
-                StorageReference filePath1 = FirebaseStorage.getInstance().getReference(model.getPostimage());
-                filePath1.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        Picasso.get().load(uri).into(holder.postImage);
-                    }
-                });*/
 
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -250,6 +230,15 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                         });
+                    }
+                });
+
+                holder.CommentPostButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent commentIntent = new Intent(MainActivity.this,CommentsActivity.class);
+                        commentIntent.putExtra("PostKey",PostKey);
+                        startActivity(commentIntent);
                     }
                 });
 
