@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
                 SendUserToPostActivity();
             }
         });
-        DisplayAllUsersPosts();
+       // DisplayAllUsersPosts();
     }
 
     private void InitialUI(){
@@ -171,8 +171,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void DisplayAllUsersPosts() {
-        Query PostRef1 = FirebaseDatabase.getInstance().getReference().child("Posts");
-        FirebaseRecyclerOptions<Posts> options=new FirebaseRecyclerOptions.Builder<Posts>().setQuery( PostRef1,Posts.class).build();
+        FirebaseRecyclerOptions<Posts> options=new FirebaseRecyclerOptions.Builder<Posts>().setQuery( PostRef,Posts.class).build();
         FirebaseRecyclerAdapter firebaseRecyclerAdapter=new FirebaseRecyclerAdapter<Posts, PostsViewHolder>(options) {
             @NonNull
             @Override
@@ -215,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });*/
 
-                holder.mView.setOnClickListener(new View.OnClickListener() {
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent clickPostIntent = new Intent(MainActivity.this,ClickPostActivity.class);
@@ -233,12 +232,14 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 if(LikeChecker.equals(true)){
-                                    Log.d("status: postKey: ",PostKey);
+                                    Log.d("status: postKey!!!: ",PostKey);
+                                    Log.d("status:CurrentUserId: ",CurrentUserId);
                                     if(dataSnapshot.child(PostKey).hasChild(CurrentUserId)){
                                         LikesRef.child(PostKey).child(CurrentUserId).removeValue();
                                         LikeChecker = false;
                                     }else{
                                         LikesRef.child(PostKey).child(CurrentUserId).setValue(true);
+                                        LikeChecker = false;
                                         //LikesRef.child(PostKey).push(CurrentUserId).setValue(true);
                                     }
                                 }
@@ -256,7 +257,9 @@ public class MainActivity extends AppCompatActivity {
         };
         postList.setAdapter(firebaseRecyclerAdapter);
         firebaseRecyclerAdapter.startListening();
+        //firebaseRecyclerAdapter.startListening();
     }
+
     public static class PostsViewHolder extends RecyclerView.ViewHolder{
         TextView username,date,time,description,DisplayNoOfLikes;
         CircleImageView user_post_image;
@@ -271,13 +274,6 @@ public class MainActivity extends AppCompatActivity {
         public PostsViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
-
-            /*username = itemView.findViewById(R.id.post_user_name);
-            date = itemView.findViewById(R.id.post_date);
-            time = itemView.findViewById(R.id.post_time);
-            description = itemView.findViewById(R.id.all_post_description);
-            postImage = itemView.findViewById(R.id.post_image);
-            user_post_image = itemView.findViewById(R.id.post_user_image);*/
 
             LikepostButton = (ImageButton) itemView.findViewById(R.id.like_button);
             CommentPostButton = (ImageButton) itemView.findViewById(R.id.comment_button);
@@ -308,7 +304,8 @@ public class MainActivity extends AppCompatActivity {
 
             public void setDescription(String description) {
                 this.description = itemView.findViewById(R.id.all_post_description);
-            }
+                this.description.setText(description);
+        }
 
             public void setProfileimage(String profileimage) {
                 user_post_image = (CircleImageView)itemView.findViewById(R.id.post_user_image);
@@ -360,6 +357,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         FirebaseUser currenUser = mAuth.getCurrentUser();
+        DisplayAllUsersPosts();
 
         if(currenUser == null){
             SendUserToLoginActivity();
@@ -367,6 +365,7 @@ public class MainActivity extends AppCompatActivity {
             CheckUserExistence();
         }
     }
+
 
     private void CheckUserExistence() {
         final String current_user_id = mAuth.getCurrentUser().getUid();
