@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
                 SendUserToPostActivity();
                 break;
             case R.id.nav_profile:
-                Toast.makeText(this, "Profile", Toast.LENGTH_SHORT).show();
+                SendUserToProfileActivity();
                 break;
             case R.id.nav_home:
                 Toast.makeText(this, "Home", Toast.LENGTH_SHORT).show();
@@ -303,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Message", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.nav_settings:
-                Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
+                SendUserToSettingsActivity();
                 break;
             case R.id.nav_Logout:
                 mAuth.signOut();
@@ -320,6 +320,16 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
         }
+    }
+
+    private void SendUserToSettingsActivity() {
+        Intent settingIntent = new Intent(MainActivity.this,SettingActivity.class);
+        startActivity(settingIntent);
+    }
+
+    private void SendUserToProfileActivity() {
+        Intent profileIntent = new Intent(MainActivity.this,ProfileActivity.class);
+        startActivity(profileIntent);
     }
 
     @Override
