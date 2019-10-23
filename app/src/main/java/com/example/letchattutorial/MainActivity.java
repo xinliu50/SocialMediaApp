@@ -171,7 +171,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void DisplayAllUsersPosts() {
-        FirebaseRecyclerOptions<Posts> options=new FirebaseRecyclerOptions.Builder<Posts>().setQuery( PostRef,Posts.class).build();
+        Query SortPostsInDecendingOrder = PostRef.orderByChild("counter");
+        FirebaseRecyclerOptions<Posts> options=new FirebaseRecyclerOptions.Builder<Posts>().setQuery( SortPostsInDecendingOrder,Posts.class).build();
         FirebaseRecyclerAdapter firebaseRecyclerAdapter=new FirebaseRecyclerAdapter<Posts, PostsViewHolder>(options) {
             @NonNull
             @Override

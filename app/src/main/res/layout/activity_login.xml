@@ -76,6 +76,7 @@
             android:textSize="18sp" />
 
         <LinearLayout
+            android:id="@+id/myLinearLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal">
@@ -101,6 +102,14 @@
                 android:layout_marginTop="10dp"
                 android:id="@+id/google_signin_button"/>
         </LinearLayout>
+        <TextView
+            android:id="@+id/forget_password_link"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Forget Password?"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"/>
 
     </LinearLayout>
 

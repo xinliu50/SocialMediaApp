@@ -81,11 +81,20 @@ public class FindFriendActivity extends AppCompatActivity {
         FirebaseRecyclerOptions<FindFriends> options=new FirebaseRecyclerOptions.Builder<FindFriends>().setQuery( SearchPeopleandFriendsQuery,FindFriends.class).build();
         FirebaseRecyclerAdapter<FindFriends, FindFriendActivity.FindFriendsViewHolder> firebaseRecyclerAdapter=new FirebaseRecyclerAdapter<FindFriends, FindFriendActivity.FindFriendsViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull FindFriendsViewHolder holder, int position, @NonNull FindFriends model) {
+            protected void onBindViewHolder(@NonNull FindFriendsViewHolder holder, final int position, @NonNull FindFriends model) {
                 //final String PostKey = getRef(position).getKey();
                 holder.setFullname(model.getFullname());
                 holder.setStatus(model.getStatus());
                 holder.setProfileImage(model.getProfileImage());
+                holder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String visit_user_id = getRef(position).getKey();
+                        Intent profileIntent = new Intent(FindFriendActivity.this, PersonProfileActivity.class);
+                        profileIntent.putExtra("visit_user_id",visit_user_id);
+                        startActivity(profileIntent);
+                    }
+                });
             }
 
             @NonNull
