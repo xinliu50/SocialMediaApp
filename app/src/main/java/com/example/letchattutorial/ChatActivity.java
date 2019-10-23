@@ -1,9 +1,11 @@
 package com.example.letchattutorial;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
@@ -22,6 +24,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,8 +35,10 @@ import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -42,6 +47,9 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton SendMessageButton, SendImagefileButton;
     private EditText userMessageInput;
     private RecyclerView userMessagesList;
+    private final List<Messages> messagesList = new ArrayList<>();
+    private LinearLayoutManager linearLayoutManager;
+    private MessagesAdapter messagesAdapter;
     private String messageReceiverID, messageReceiverName, messageSenderID, saveCurrentDate, saveCurrentTime;
     private TextView receiverName;
     private CircleImageView receiverProfileImage;
@@ -61,6 +69,8 @@ public class ChatActivity extends AppCompatActivity {
                 SendMessage();
             }
         });
+
+        FetchMessages();
     }
 
     private void InitialUI() {
@@ -84,6 +94,13 @@ public class ChatActivity extends AppCompatActivity {
         RootRef = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         messageSenderID = mAuth.getCurrentUser().getUid();
+
+        messagesAdapter = new MessagesAdapter(messagesList);
+        userMessagesList = (RecyclerView)findViewById(R.id.messages_list_users);
+        linearLayoutManager = new LinearLayoutManager(this);
+        userMessagesList.setHasFixedSize(true);
+        userMessagesList.setLayoutManager(linearLayoutManager);
+        userMessagesList.setAdapter(messagesAdapter);
     }
 
     private void DisplayReceiverInfo() {
@@ -147,11 +164,47 @@ public class ChatActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task task) {
                     if(task.isSuccessful()){
                         Toast.makeText(ChatActivity.this,"Message sent successfully",Toast.LENGTH_LONG).show();
+                        userMessageInput.setText("");
                     }else{
                         Toast.makeText(ChatActivity.this,"Error.."+task.getException().getMessage(),Toast.LENGTH_LONG).show();
+                        userMessageInput.setText("");
                     }
                 }
             });
         }
+    }
+
+    private void FetchMessages() {
+        RootRef.child("Messages").child(messageSenderID).child(messageReceiverID)
+                .addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                        if(dataSnapshot.exists()){
+                            Messages messages = dataSnapshot.getValue(Messages.class);
+                            messagesList.add(messages);
+                            messagesAdapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
     }
 }
