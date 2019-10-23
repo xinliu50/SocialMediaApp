@@ -401,13 +401,13 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Home", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.nav_friends:
-                Toast.makeText(this, "Friends", Toast.LENGTH_SHORT).show();
+                SendUserToFriendsActivity();
                 break;
             case R.id.nav_find_friends:
                 SendUserToFindFriendsActivity();
                 break;
             case R.id.nav_message:
-                Toast.makeText(this, "Message", Toast.LENGTH_SHORT).show();
+                SendUserToFriendsActivity();
                 break;
             case R.id.nav_settings:
                 SendUserToSettingsActivity();
@@ -427,6 +427,11 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
         }
+    }
+
+    private void SendUserToFriendsActivity() {
+        Intent friendsIntent = new Intent(MainActivity.this,FriendsActivity.class);
+        startActivity(friendsIntent);
     }
 
     private void SendUserToFindFriendsActivity() {
