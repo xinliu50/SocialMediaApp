@@ -60,23 +60,41 @@ public class SettingActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
-                    String myProfileImage = dataSnapshot.child("profileImage").getValue().toString();
-                    String myUserName = dataSnapshot.child("username").getValue().toString();
-                    String myProfileName = dataSnapshot.child("fullname").getValue().toString();
-                    String myProfileStatus = dataSnapshot.child("status").getValue().toString();
-                    String myDOB = dataSnapshot.child("dob").getValue().toString();
-                    String myCountry = dataSnapshot.child("country").getValue().toString();
-                    String myGender = dataSnapshot.child("gender").getValue().toString();
-                    String myRelationStatus = dataSnapshot.child("relationshipstatus").getValue().toString();
+                    String myProfileImage = "";
+                    String myUserName = "";
+                    String myProfileName = "";
+                    String myProfileStatus = "";
+                    String myDOB = "";
+                    String myCountry = "";
+                    String myGender = "";
+                    String myRelationStatus = "";
 
-                    StorageReference path = FirebaseStorage.getInstance().getReference(myProfileImage);
-                    path.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            Picasso.get().load(uri).placeholder(R.drawable.profile).into(userProImage);
-                        }
-                    });
+                    if(dataSnapshot.hasChild("profileImage"))
+                        myProfileImage = dataSnapshot.child("profileImage").getValue().toString();
+                    if(dataSnapshot.hasChild("username"))
+                        myUserName = dataSnapshot.child("username").getValue().toString();
+                    if(dataSnapshot.hasChild("fullname"))
+                        myProfileName = dataSnapshot.child("fullname").getValue().toString();
+                    if(dataSnapshot.hasChild("status"))
+                        myProfileStatus = dataSnapshot.child("status").getValue().toString();
+                    if(dataSnapshot.hasChild("dob"))
+                        myDOB = dataSnapshot.child("dob").getValue().toString();
+                    if(dataSnapshot.hasChild("country"))
+                        myCountry = dataSnapshot.child("country").getValue().toString();
+                    if(dataSnapshot.hasChild("gender"))
+                        myGender = dataSnapshot.child("gender").getValue().toString();
+                    if(dataSnapshot.hasChild("relationshipstatus"))
+                        myRelationStatus = dataSnapshot.child("relationshipstatus").getValue().toString();
 
+                    if(!myProfileImage.equals("")) {
+                        StorageReference path = FirebaseStorage.getInstance().getReference(myProfileImage);
+                        path.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                Picasso.get().load(uri).placeholder(R.drawable.profile).into(userProImage);
+                            }
+                        });
+                    }
                     userName.setText(myUserName);
                     userProfName.setText(myProfileName);
                     userStatus.setText(myProfileStatus);

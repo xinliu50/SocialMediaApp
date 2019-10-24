@@ -90,8 +90,7 @@ public class RegisterActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
-                                SendUsertoSetupActivity();
-                                Toast.makeText(RegisterActivity.this,"You are authenticated successfully! ", Toast.LENGTH_LONG).show();
+                                SendEmailVerificationMessage();
                                 loadingBar.dismiss();
                             }else{
                                 String message = task.getException().getMessage();
@@ -103,10 +102,29 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private void SendUsertoSetupActivity() {
-        Intent setUpIntent = new Intent(RegisterActivity.this, SetupActivity.class);
-        setUpIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(setUpIntent);
+    private void SendUsertoLoginActivity() {
+        Intent logIntent = new Intent(RegisterActivity.this, LoginActivity.class);
+        logIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(logIntent);
         finish();
+    }
+
+    private void SendEmailVerificationMessage(){
+        FirebaseUser user = mAuth.getCurrentUser();
+        if(user != null){
+            user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()){
+                        Toast.makeText(RegisterActivity.this,"Register Successful, we've send you a email. Please check your email and verify your account...",Toast.LENGTH_LONG).show();
+                        SendUsertoLoginActivity();
+                        mAuth.signOut();
+                    }else{
+                        Toast.makeText(RegisterActivity.this,"Error..."+task.getException().getMessage(),Toast.LENGTH_LONG).show();
+                        mAuth.signOut();
+                    }
+                }
+            });
+        }
     }
 }

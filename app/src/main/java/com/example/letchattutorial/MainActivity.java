@@ -52,6 +52,10 @@ import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.HashMap;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
@@ -83,6 +87,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         InitialUI();
 
+       // FirebaseUser currenUser = mAuth.getCurrentUser();
+
+
+       /* if(currenUser == null){
+            Log.d("status", "NUll");
+            SendUserToLoginActivity();
+        }else{
+            Log.d("status,userID", CurrentUserId);
+            CheckUserExistence();
+        }*/
+
         GoogleSignInOptions gso = new GoogleSignInOptions
                 .Builder()
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -103,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
+                    Log.d("status,I am here", dataSnapshot.toString());
                     if (dataSnapshot.hasChild("fullname")) {
                         String fullname = dataSnapshot.child("fullname").getValue().toString();
                         NavProfileUserName.setText(fullname);
@@ -129,6 +145,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        Log.d("status,I am here", "!!!!");
         AddNewPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -141,7 +159,8 @@ public class MainActivity extends AppCompatActivity {
     private void InitialUI(){
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
-        UserRef = database.getReference().child("Users");
+        UserRef = FirebaseDatabase.getInstance().getReference().child("Users");
+        Log.d("status,UserRed", UserRef.toString());
         PostRef = database.getReference().child("Posts");
         CurrentUserId = mAuth.getCurrentUser().getUid();
         AddNewPostButton = (ImageButton)findViewById(R.id.add_new_post_button);
@@ -246,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         postList.setAdapter(firebaseRecyclerAdapter);
+        updateUserStatus("online");
         firebaseRecyclerAdapter.startListening();
         //firebaseRecyclerAdapter.startListening();
     }
@@ -347,29 +367,37 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         FirebaseUser currenUser = mAuth.getCurrentUser();
-        DisplayAllUsersPosts();
 
         if(currenUser == null){
             SendUserToLoginActivity();
         }else{
             CheckUserExistence();
         }
+        DisplayAllUsersPosts();
     }
 
 
     private void CheckUserExistence() {
         final String current_user_id = mAuth.getCurrentUser().getUid();
+        Log.d("status,userID!!!", current_user_id);
+
+
         UserRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.d("status", dataSnapshot.toString());
                 if(!dataSnapshot.hasChild(current_user_id)){
+                    Log.d("status,userID~~~", current_user_id);
                     SendUserToSetUpActivity();
+                   // Log.d("status,userID", current_user_id);
+                }else{
+                    Log.d("status", "has child@");
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                Log.d("status", databaseError.getDetails());
             }
         });
 
@@ -413,6 +441,7 @@ public class MainActivity extends AppCompatActivity {
                 SendUserToSettingsActivity();
                 break;
             case R.id.nav_Logout:
+                updateUserStatus("offline");
                 mAuth.signOut();
                 mGoogleSignInClient.signOut()
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -455,5 +484,25 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void updateUserStatus(String state){
+        String saveCurrentDate, saveCurrentTime;
+
+        Calendar calForDate = Calendar.getInstance();
+        SimpleDateFormat currentDate = new SimpleDateFormat("MM dd, yyyy");
+        saveCurrentDate = currentDate.format(calForDate.getTime());
+
+        Calendar calForTime = Calendar.getInstance();
+        SimpleDateFormat currentTime = new SimpleDateFormat("hh:mm a");
+        saveCurrentTime = currentTime.format(calForTime.getTime());
+
+        HashMap currentStateMap = new HashMap();
+        currentStateMap.put("time",saveCurrentTime);
+        currentStateMap.put("date",saveCurrentDate);
+        currentStateMap.put("type",state);
+
+        UserRef.child(CurrentUserId).child("userState")
+                .updateChildren(currentStateMap);
     }
 }

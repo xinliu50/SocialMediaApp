@@ -31,8 +31,13 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
 public class LoginActivity extends AppCompatActivity {
     private Button LoginButton;
@@ -45,6 +50,9 @@ public class LoginActivity extends AppCompatActivity {
     private GoogleSignInClient mGoogleSignInClient;
     private static final String TAG = "LoginActivity";
     GoogleSignInOptions gso;
+    private Boolean emailAddressChecker;
+    private FirebaseDatabase database;
+    private DatabaseReference UserRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +94,8 @@ public class LoginActivity extends AppCompatActivity {
         UserPassword = (EditText)findViewById(R.id.login_password);
         LoginButton = (Button)findViewById(R.id.login_button);
         mAuth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance();
+        UserRef = database.getReference().child("Users");
         loadingBar = new ProgressDialog(this);
         googleSignInButton = (ImageView)findViewById(R.id.google_signin_button);
         ForgetPasswordLink = (TextView)findViewById(R.id.forget_password_link);
@@ -187,8 +197,7 @@ public class LoginActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
-                                SendUserToMainActivity();
-                                Toast.makeText(LoginActivity.this,"You are logged in successfully", Toast.LENGTH_LONG).show();
+                                VerifyEmailAddress();
                                 loadingBar.dismiss();
                             }else{
                                 String message = task.getException().getMessage();
@@ -206,9 +215,31 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(mainIntent);
         finish();
     }
+
     private void SendUserToRegisterActivity() {
         Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
         startActivity(registerIntent);
+    }
+
+    private void VerifyEmailAddress(){
+        FirebaseUser user = mAuth.getCurrentUser();
+        String currentUserId = user.getUid();
+        emailAddressChecker = user.isEmailVerified();
+
+        if(emailAddressChecker){
+            Log.d("status", "valid");
+            SendUserToMainActivity();
+        }else{
+            Toast.makeText(this, "Please verify your Account first", Toast.LENGTH_LONG).show();
+            mAuth.signOut();
+        }
+    }
+
+    private void SendUserToSetUpActivity() {
+        Intent setupIntent = new Intent(LoginActivity.this,SetupActivity.class);
+        setupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(setupIntent);
+        finish();
     }
 
 }
