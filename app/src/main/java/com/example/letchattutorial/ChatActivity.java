@@ -34,6 +34,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
+import org.w3c.dom.Text;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -51,7 +53,7 @@ public class ChatActivity extends AppCompatActivity {
     private LinearLayoutManager linearLayoutManager;
     private MessagesAdapter messagesAdapter;
     private String messageReceiverID, messageReceiverName, messageSenderID, saveCurrentDate, saveCurrentTime;
-    private TextView receiverName;
+    private TextView receiverName, userLastSeen;
     private CircleImageView receiverProfileImage;
     private DatabaseReference RootRef;
     private FirebaseAuth mAuth;
@@ -88,6 +90,7 @@ public class ChatActivity extends AppCompatActivity {
         SendMessageButton = (ImageButton)findViewById(R.id.send_message_button);
         SendImagefileButton = (ImageButton)findViewById(R.id.send_image_file_button);
         userMessageInput = (EditText)findViewById(R.id.input_message);
+        userLastSeen = (TextView)findViewById(R.id.custom_user_last_seen);
 
         messageReceiverID = getIntent().getExtras().get("visit_user_id").toString();
         messageReceiverName = getIntent().getExtras().get("userName").toString();
@@ -110,6 +113,10 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
                     final String profileImage = dataSnapshot.child("profileImage").getValue().toString();
+                    final String type = dataSnapshot.child("userState").child("type").getValue().toString();
+                    final String lastDate = dataSnapshot.child("userState").child("date").getValue().toString();
+                    final String lastTime = dataSnapshot.child("userState").child("time").getValue().toString();
+
                     StorageReference path = FirebaseStorage.getInstance().getReference(profileImage);
                     path.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                         @Override
@@ -117,6 +124,11 @@ public class ChatActivity extends AppCompatActivity {
                             Picasso.get().load(uri).placeholder(R.drawable.profile).into(receiverProfileImage);
                         }
                     });
+                    if(type.equals("online")){
+                        userLastSeen.setText("online");
+                    }else{
+                        userLastSeen.setText("last seen: " + lastTime + " " + lastDate);
+                    }
                 }
             }
 

@@ -190,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void DisplayAllUsersPosts() {
+        updateUserStatus("online");
         Query SortPostsInDecendingOrder = PostRef.orderByChild("counter");
         FirebaseRecyclerOptions<Posts> options=new FirebaseRecyclerOptions.Builder<Posts>().setQuery( SortPostsInDecendingOrder,Posts.class).build();
         FirebaseRecyclerAdapter firebaseRecyclerAdapter=new FirebaseRecyclerAdapter<Posts, PostsViewHolder>(options) {
@@ -265,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         postList.setAdapter(firebaseRecyclerAdapter);
-        updateUserStatus("online");
+       // updateUserStatus("online");
         firebaseRecyclerAdapter.startListening();
         //firebaseRecyclerAdapter.startListening();
     }
@@ -381,7 +382,6 @@ public class MainActivity extends AppCompatActivity {
         final String current_user_id = mAuth.getCurrentUser().getUid();
         Log.d("status,userID!!!", current_user_id);
 
-
         UserRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -420,24 +420,30 @@ public class MainActivity extends AppCompatActivity {
     private void UserMenuSelector(MenuItem item) {
         switch (item.getItemId()){
             case R.id.nav_post:
+                updateUserStatus("online");
                 SendUserToPostActivity();
                 break;
             case R.id.nav_profile:
+                updateUserStatus("online");
                 SendUserToProfileActivity();
                 break;
             case R.id.nav_home:
                 Toast.makeText(this, "Home", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.nav_friends:
+                updateUserStatus("online");
                 SendUserToFriendsActivity();
                 break;
             case R.id.nav_find_friends:
+                updateUserStatus("online");
                 SendUserToFindFriendsActivity();
                 break;
             case R.id.nav_message:
+                updateUserStatus("online");
                 SendUserToFriendsActivity();
                 break;
             case R.id.nav_settings:
+                updateUserStatus("online");
                 SendUserToSettingsActivity();
                 break;
             case R.id.nav_Logout:
@@ -501,7 +507,7 @@ public class MainActivity extends AppCompatActivity {
         currentStateMap.put("time",saveCurrentTime);
         currentStateMap.put("date",saveCurrentDate);
         currentStateMap.put("type",state);
-
+        
         UserRef.child(CurrentUserId).child("userState")
                 .updateChildren(currentStateMap);
     }

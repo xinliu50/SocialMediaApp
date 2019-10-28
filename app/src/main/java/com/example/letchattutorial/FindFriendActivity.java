@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
@@ -31,6 +32,10 @@ import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.HashMap;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class FindFriendActivity extends AppCompatActivity {
@@ -39,7 +44,9 @@ public class FindFriendActivity extends AppCompatActivity {
     private EditText SearchInputText;
     private RecyclerView SearchResultList;
     private FirebaseRecyclerOptions<FindFriends> options;
-    private DatabaseReference allUsersDatabaseRef;
+    private DatabaseReference allUsersDatabaseRef, UserRef;
+    private String CurrentUserId;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +77,9 @@ public class FindFriendActivity extends AppCompatActivity {
         SearchButton = (ImageButton)findViewById(R.id.search_people_friends_button);
         SearchInputText = (EditText)findViewById(R.id.search_box_input);
         allUsersDatabaseRef = FirebaseDatabase.getInstance().getReference().child("Users");
-
+        UserRef = FirebaseDatabase.getInstance().getReference().child("Users");
+        mAuth = FirebaseAuth.getInstance();
+        CurrentUserId = mAuth.getCurrentUser().getUid();
     }
 
     private void SearchPeopleAndFriends(String searchBoxInput) {
@@ -107,6 +116,7 @@ public class FindFriendActivity extends AppCompatActivity {
         };
         SearchResultList.setAdapter(firebaseRecyclerAdapter);
         firebaseRecyclerAdapter.startListening();
+        //updateUserStatus("online");
     }
     public static class FindFriendsViewHolder extends RecyclerView.ViewHolder{
         CircleImageView myImage;
@@ -141,4 +151,23 @@ public class FindFriendActivity extends AppCompatActivity {
         }
     }
 
+    public void updateUserStatus(String state){
+        String saveCurrentDate, saveCurrentTime;
+
+        Calendar calForDate = Calendar.getInstance();
+        SimpleDateFormat currentDate = new SimpleDateFormat("MM dd, yyyy");
+        saveCurrentDate = currentDate.format(calForDate.getTime());
+
+        Calendar calForTime = Calendar.getInstance();
+        SimpleDateFormat currentTime = new SimpleDateFormat("hh:mm a");
+        saveCurrentTime = currentTime.format(calForTime.getTime());
+
+        HashMap currentStateMap = new HashMap();
+        currentStateMap.put("time",saveCurrentTime);
+        currentStateMap.put("date",saveCurrentDate);
+        currentStateMap.put("type",state);
+
+        UserRef.child(CurrentUserId).child("userState")
+                .updateChildren(currentStateMap);
+    }
 }

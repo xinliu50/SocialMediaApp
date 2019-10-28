@@ -14,6 +14,7 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -67,20 +68,20 @@ public class FriendsActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        updateUserStatus("online");
+        //updateUserStatus("online");
         DisplayAllFriends();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        updateUserStatus("offline");
+       // updateUserStatus("offline");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        updateUserStatus("offline");
+        //updateUserStatus("offline");
     }
 
     private void DisplayAllFriends() {
@@ -97,6 +98,16 @@ public class FriendsActivity extends AppCompatActivity {
                         if(dataSnapshot.exists()){
                             final String userName = dataSnapshot.child("fullname").getValue().toString();
                             final String profileImage = dataSnapshot.child("profileImage").getValue().toString();
+                            final String type;
+
+                            if(dataSnapshot.hasChild("userState")){
+                                type = dataSnapshot.child("userState").child("type").getValue().toString();
+                                if(type.equals("online")){
+                                    holder.onlineStatueView.setVisibility(View.VISIBLE);
+                                }else{
+                                    holder.onlineStatueView.setVisibility(View.INVISIBLE);
+                                }
+                            }
 
                             holder.setFullname(userName);
                             holder.setProfileImage(profileImage);
@@ -154,11 +165,14 @@ public class FriendsActivity extends AppCompatActivity {
 
     public static class FriendsViewHolder extends RecyclerView.ViewHolder{
         View mView;
+        ImageView onlineStatueView;
 
         public FriendsViewHolder(@NonNull View itemView) {
             super(itemView);
             mView = itemView;
+            onlineStatueView = (ImageView)itemView.findViewById(R.id.all_user_online_icon);
         }
+
         public void setProfileImage(String profileImage) {
             final CircleImageView myImage = (CircleImageView)mView.findViewById(R.id.all_users_profile_image);
             StorageReference path = FirebaseStorage.getInstance().getReference(profileImage);

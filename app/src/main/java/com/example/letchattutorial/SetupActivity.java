@@ -79,27 +79,19 @@ public class SetupActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
-                    //String image = dataSnapshot.child("profileImage").getValue().toString();
-                    //Log.d("status",image);
-                   // String image = downloadUrl;
-                    /*StorageReference path = UserProfileImageRef.child(CurrentUserId);
-                    path.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            image = uri.toString();
+                    if(dataSnapshot.hasChild("profileImage")) {
+                        String image = dataSnapshot.child("profileImage").getValue().toString();
+                        if( image != null){
+                            StorageReference path = FirebaseStorage.getInstance().getReference(image);
+                            path.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    Picasso.get().load(uri).placeholder(R.drawable.profile).into(ProfileImage);
+                                }
+                            });
+                        }else{
+                            Toast.makeText(SetupActivity.this,"Please select profile image first", Toast.LENGTH_LONG).show();
                         }
-                    });*/
-                    String image = dataSnapshot.child("profileImage").getValue().toString();
-                    if( image != null){
-                        StorageReference path = FirebaseStorage.getInstance().getReference(image);
-                        path.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                            @Override
-                            public void onSuccess(Uri uri) {
-                                Picasso.get().load(uri).placeholder(R.drawable.profile).into(ProfileImage);
-                            }
-                        });
-                    }else{
-                        Toast.makeText(SetupActivity.this,"Please select profile image first", Toast.LENGTH_LONG).show();
                     }
                 }else{
                     Log.d("status","NOT EXSIT");
