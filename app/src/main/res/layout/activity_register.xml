@@ -12,7 +12,7 @@
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_marginTop="10dp"
-        app:srcCompat="@drawable/logo"
+        app:srcCompat="@drawable/lct"
         android:layout_centerHorizontal="true"/>
 
     <LinearLayout

@@ -9,17 +9,18 @@
 
     <ImageView
         android:id="@+id/login_icon"
-        android:layout_width="150dp"
+        android:layout_width="750dp"
         android:layout_height="150dp"
-        android:layout_marginTop="20dp"
-        app:srcCompat="@drawable/logo"
+        android:layout_marginTop="35dp"
+        app:srcCompat="@drawable/lct"
         android:layout_centerHorizontal="true"/>
 
     <LinearLayout
+        android:id="@+id/linear1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/login_icon"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="40dp"
         android:orientation="vertical">
 
         <EditText
@@ -74,44 +75,28 @@
             android:text="or Log in with"
             android:textAlignment="center"
             android:textSize="18sp" />
+    </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/myLinearLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-            <ImageView
-                android:layout_width="100dp"
-                android:layout_height="80dp"
-                android:src="@drawable/facebook"
-                android:layout_marginLeft="25dp"
-                android:layout_marginTop="8dp"
-                android:id="@+id/facebook_signin_button"/>
-            <ImageView
-                android:layout_width="125dp"
-                android:layout_height="105dp"
-                android:src="@drawable/twitter"
-                android:layout_marginLeft="5dp"
-                android:id="@+id/twitter_signin_button"
-                />
-            <ImageView
-                android:layout_width="100dp"
-                android:layout_height="80dp"
-                android:src="@drawable/google"
-                android:layout_marginLeft="15dp"
-                android:layout_marginTop="10dp"
-                android:id="@+id/google_signin_button"/>
-        </LinearLayout>
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="80dp"
+            android:src="@drawable/google"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/linear1"
+            android:id="@+id/google_signin_button"/>
+
         <TextView
             android:id="@+id/forget_password_link"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/google_signin_button"
+            android:layout_marginTop="15dp"
             android:text="Forget Password?"
             android:textAlignment="center"
             android:textColor="@android:color/black"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
-    </LinearLayout>
 
 
 </RelativeLayout>
