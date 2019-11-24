@@ -1,6 +1,6 @@
 # LetChat
 
-![LetChat Demo](media/Letchat.gif)
+![LetChat Demo](media/speedmp4.gif)
 
 
 ##  Greeting!
