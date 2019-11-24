@@ -1,6 +1,6 @@
 # LetChat
 
-![LetChat Demo](media/Letchat.gif)
+![LetChat Demo](media/Letchat.gif=300*600)
 
 
 ##  Greeting!
